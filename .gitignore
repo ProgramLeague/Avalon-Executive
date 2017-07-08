@@ -60,3 +60,6 @@ hs_err_pid*
 .gradle/
 .idea/
 out
+/sandbox
+/src/main/cpp/cmake-build-debug
+/data.json

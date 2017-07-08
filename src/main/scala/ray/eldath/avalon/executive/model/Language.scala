@@ -1,5 +1,6 @@
 package ray.eldath.avalon.executive.model
 
+
 class Language(id: String, name: String, compileCmd: String, runCmd: String) {
   def getId: String = id
 

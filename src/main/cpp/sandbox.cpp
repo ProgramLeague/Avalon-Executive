@@ -148,6 +148,8 @@ int main(int argc, char **argv) {
         puts("Entering target cmd...");
 #endif
 
+        chdir("/sandbox");
+
         setuid(SANDBOX_UID);
         setgid(SANDBOX_GID);
 
