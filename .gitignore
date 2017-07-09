@@ -64,3 +64,4 @@ out
 /src/main/cpp/cmake-build-debug
 /data.json
 build/
+/src/main/cpp/HelloWorld.cpp

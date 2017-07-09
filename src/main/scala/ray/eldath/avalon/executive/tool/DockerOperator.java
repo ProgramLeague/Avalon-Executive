@@ -5,12 +5,15 @@ import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.LogStream;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.ContainerState;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ray.eldath.avalon.executive.model.ExecState;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -43,8 +46,13 @@ public class DockerOperator implements Closeable {
     public String createContainer(String image) throws DockerException, InterruptedException {
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(image)
+                .workingDir("/sandbox")
                 .build();
-        String containerId = client.createContainer(containerConfig).id();
+        return createContainer(containerConfig);
+    }
+
+    public String createContainer(ContainerConfig config) throws DockerException, InterruptedException {
+        String containerId = client.createContainer(config).id();
         client.startContainer(containerId);
         LOGGER.info("container created and running: " + containerId);
         return containerId;
@@ -54,9 +62,16 @@ public class DockerOperator implements Closeable {
         return createContainer(createImage(dockerfile, imageName));
     }
 
+    /**
+     * @deprecated 请使用 {@link #pull(String)} 和 {@link #createContainer(String)} 完成相同功能。
+     */
     public String createContainerOnline(String imageName) throws DockerException, InterruptedException {
         client.pull(imageName);
         return createContainer(imageName);
+    }
+
+    public void pull(String imageName) throws DockerException, InterruptedException {
+        client.pull(imageName);
     }
 
     public void copyFileIn(String containerId, Path input, String pathInContainer)
@@ -67,21 +82,24 @@ public class DockerOperator implements Closeable {
                 .append(containerId).append(":").append(pathInContainer).append(" successful").toString());
     }
 
-    public void copyFileOut(String containerId, Path output, String pathInContainer)
+    public void copyFileOut(String containerId, File output, String pathInContainer)
             throws DockerException, InterruptedException, IOException {
         IOUtils.copy(new TarArchiveInputStream(client.archiveContainer(containerId, pathInContainer)),
-                new FileOutputStream(output.toFile()));
+                new FileOutputStream(output));
         StringBuilder builder = new StringBuilder();
         LOGGER.info(builder.append("copy files ").append(pathInContainer).append(" out of container ")
-                .append(containerId).append(":").append(pathInContainer).append(" successful").toString());
+                .append(containerId).append(" successful").toString());
     }
 
-    public String exec(String containerId, String[] cmd) throws DockerException, InterruptedException {
+    public ExecState exec(String containerId, String[] cmd) throws DockerException, InterruptedException {
         final String execId = client.execCreate(containerId, cmd).id();
-        LOGGER.info("execute cmd to container successful: " + execId);
-        try (final LogStream logStream = client.execStart(execId)) {
-            return logStream.readFully();
+        String log;
+        try (final LogStream stream = client.execStart(execId)) {
+            log = stream.readFully();
         }
+        LOGGER.info("execute cmd to container successful: " + execId);
+        Integer integer = client.execInspect(execId).exitCode();
+        return new ExecState(integer == null ? -1 : integer, log);
     }
 
     public void closeContainer(String containerId) throws DockerException, InterruptedException {
@@ -89,11 +107,15 @@ public class DockerOperator implements Closeable {
         client.removeContainer(containerId);
     }
 
-    DockerClient getClient() {
+    public ContainerState inspectContainer(String containerId) throws DockerException, InterruptedException {
+        return client.inspectContainer(containerId).state();
+    }
+
+    public DockerClient getClient() {
         return client;
     }
 
-    public static DockerOperator getInstance() {
+    public static DockerOperator instance() {
         if (instance == null)
             try {
                 instance = new DockerOperator();

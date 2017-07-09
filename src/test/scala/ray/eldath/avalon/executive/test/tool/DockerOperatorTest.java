@@ -10,13 +10,13 @@ import java.nio.file.Paths;
 
 public class DockerOperatorTest {
     public static void main(String[] args) throws IOException, InterruptedException, DockerException, DockerCertificateException {
-        String containerId = DockerOperator.getInstance().createContainer(Paths.get(
-                ConstantPool.currentPath() + "/docker"), "ray-eldath/avalon-executive");
+        String containerId = DockerOperator.instance().createContainer(Paths.get(
+                ConstantPool.Path.currentPath() + "/docker"), "ray-eldath/avalon-executive");
         try {
-            DockerOperator.getInstance().copyFileIn(containerId, Paths.get("F:\\test"), "/sandbox");
+            DockerOperator.instance().copyFileIn(containerId, Paths.get("F:\\test"), "/sandbox");
         } catch (Exception e) {
-            DockerOperator.getInstance().closeContainer(containerId);
-            DockerOperator.getInstance().close();
+            DockerOperator.instance().closeContainer(containerId);
+            DockerOperator.instance().close();
             e.printStackTrace();
         }
     }
