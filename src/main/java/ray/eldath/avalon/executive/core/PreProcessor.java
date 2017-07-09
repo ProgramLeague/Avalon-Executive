@@ -11,11 +11,17 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PreProcessor {
+    private static final PreProcessor instance = new PreProcessor();
+
+    public static PreProcessor instance() {
+        return instance;
+    }
 
     public File createFile(String workDirectory, Submission submission)
             throws IOException, DockerException, InterruptedException {
@@ -25,11 +31,13 @@ public class PreProcessor {
             throw new IOException("failed to create directory: " + workDirectory);
 
         Language language = submission.getLanguage();
-        String filePath = workDirectory + String.valueOf(submission.getSubmitTime());
-        String codeFilePath = String.format("%s/_file.%s", filePath, getCodeFileSuffix(language));
+        String filePath = workDirectory + "/" + String.valueOf(submission.getSubmitTime());
+        String codeFilePath = String.format("%s/_file.%s", filePath, getCodeFileSuffix(language.getCompileCmd()));
         String[] codeLinesArray = replaceClassName(language, submission.getDecodedCode())
                 .replace("\r", "")
                 .split("\n");
+
+        Files.createDirectories(Paths.get(codeFilePath).getParent());
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(codeFilePath));
         for (String thisLineCode : codeLinesArray) {
@@ -37,9 +45,10 @@ public class PreProcessor {
             writer.newLine();
         }
         IOUtils.closeQuietly(writer);
+
         DockerOperator.instance().copyFileIn(
                 CompilerContainerPool.instance().getContainerId(language),
-                Paths.get(codeFilePath),
+                Paths.get(codeFilePath).getParent(),
                 "/sandbox");
         return new File(codeFilePath);
     }
@@ -58,9 +67,8 @@ public class PreProcessor {
         return code.replaceAll("class[ \n]+Main", "class _file");
     }
 
-    public static String getCodeFileSuffix(Language language) {
-        String compileCmd = language.getCompileCmd();
-        Matcher matcher = Pattern.compile("_file\\.((?!exe| ).)+").matcher(compileCmd);
-        return matcher.find() ? matcher.group().replace("{file}.", "") : "";
+    static String getCodeFileSuffix(String cmd) {
+        Matcher matcher = Pattern.compile("_file\\.((?!exe| ).)+").matcher(cmd);
+        return matcher.find() ? matcher.group().replace("_file.", "") : "";
     }
 }

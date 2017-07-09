@@ -18,10 +18,10 @@ public class Compiler {
     public static File compile(String workDir, Submission submission, File codeFile)
             throws DockerException, InterruptedException, IOException, CompileErrorException {
         Language language = submission.getLanguage();
-        String executableSuffix = getCodeFileSuffix(language);
+        String cmd = language.getCompileCmd();
+        String executableSuffix = getCodeFileSuffix(cmd);
         File executableFile = new File(String.format("%s/%s/_file.%s", workDir, submission.getSubmitTime(), executableSuffix));
         String containerId = CompilerContainerPool.instance().getContainerId(language);
-        String cmd = language.getCompileCmd();
 
         DockerOperator.instance().copyFileIn(containerId, Paths.get(codeFile.getParent()), ".");
         ExecState state = DockerOperator.instance().exec(containerId, new String[]{cmd});

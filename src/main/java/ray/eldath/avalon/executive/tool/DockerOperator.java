@@ -43,9 +43,15 @@ public class DockerOperator implements Closeable {
         return returnedImageId;
     }
 
+    public boolean isImageExist(String imageName) throws DockerException, InterruptedException {
+        return !client.listImages(DockerClient.ListImagesParam.byName(imageName)).isEmpty();
+
+    }
+
     public String createContainer(String image) throws DockerException, InterruptedException {
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(image)
+                .cmd("sh", "-c", "while :; do sleep 1; done")
                 .workingDir("/sandbox")
                 .build();
         return createContainer(containerConfig);

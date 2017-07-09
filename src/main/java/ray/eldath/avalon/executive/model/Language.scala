@@ -6,7 +6,7 @@ class Language(id: String, name: String, buildDockerImageName: String, runDocker
 
   def getName: String = name
 
-  def getBuildDockerImageName: String = buildDockerImageName
+  def getCompileDockerImageName: String = buildDockerImageName
 
   def getRunDockerImageName: String = runDockerImageName
 

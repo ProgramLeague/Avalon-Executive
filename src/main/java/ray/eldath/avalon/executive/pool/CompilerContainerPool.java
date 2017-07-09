@@ -17,7 +17,10 @@ public class CompilerContainerPool {
     }
 
     private String newContainer(Language language) throws DockerException, InterruptedException {
-        String r = DockerOperator.instance().createContainer(language.getBuildDockerImageName());
+        String name = language.getCompileDockerImageName();
+        if (!DockerOperator.instance().isImageExist(name))
+            DockerOperator.instance().pull(language.getCompileDockerImageName());
+        String r = DockerOperator.instance().createContainer(name);
         map.put(language, r);
         return r;
     }
