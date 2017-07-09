@@ -1,7 +1,7 @@
 # Avalon-Executive [![GNU Affero General Public License, version 3](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/lgpl.html)
 A safe program compiler & executor base on Docker.
 
-## Usage
+## Deployment
 1. Prepare environment and build C++ part: 
 
     On Linux (**Not test**):
@@ -11,7 +11,7 @@ A safe program compiler & executor base on Docker.
     sudo docker -H 127.0.0.1:2375 -d &
     cd SOURCE_CODE_PATH/src/main/cpp
     sudo ./test.sh
-    mv sandbox SOURCE_CODE_PATH
+    mv sandbox SOURCE_CODE_PATH/docker
     ```
     
     On Windows 10 **Pro**, **Enterprise** or **Education**, **build >= 10586**:
@@ -22,8 +22,8 @@ A safe program compiler & executor base on Docker.
     5. Run commands **in Cygwin**:
     ```
     cd SOURCE_CODE_PATH/src/main/cpp
-    g++ -o sandbox sandbox.cpp
-    mv sandbox SOURCE_CODE_PATH
+    g++ --static -pthread -o sandbox sandbox.cpp
+    mv sandbox SOURCE_CODE_PATH/docker
     ```
     
 2. Download newest RELEASE. (If no release, see *Build*)

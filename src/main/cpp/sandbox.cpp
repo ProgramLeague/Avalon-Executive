@@ -4,6 +4,8 @@
 #include <signal.h>
 #include <pthread.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
+#include <pthread.h>
 
 const pid_t SANDBOX_UID = 1111;
 const pid_t SANDBOX_GID = 1111;

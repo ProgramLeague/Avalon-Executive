@@ -1,11 +1,9 @@
 package ray.eldath.avalon.executive.tool
 
-import java.io.{Closeable, File, FileWriter}
+import java.io.{Closeable, File, FileReader, FileWriter}
 
-import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.io.IOUtils
-import org.json.JSONObject
-import org.slf4j.LoggerFactory
+import org.json.{JSONObject, JSONTokener}
 import ray.eldath.avalon.executive.model.Preservable
 import ray.eldath.avalon.executive.pool.ConstantPool
 
@@ -13,27 +11,30 @@ class RunDataSystem {
 }
 
 object RunDataSystem extends Preservable with Closeable {
-  private val LOGGER = LoggerFactory.getLogger(classOf[RunDataSystem])
   private val dataFile = new File(ConstantPool.currentPath + "/data.json")
-  private val valueObj = new JSONObject
-  private val writer = new FileWriter(dataFile)
+  private val writer = new FileWriter(dataFile, false)
 
-  private val config: Config = {
-    valueObj.put("created_image", false)
-    writer.write(valueObj.toString())
+  if (dataFile.length() == 0) {
+    val obj = new JSONObject
+    obj.put("created_image", false)
+    writer.write(obj.toString)
     writer.flush()
-    ConfigFactory.parseFile(dataFile)
   }
 
-  def getString(key: String): String = config.getString(key)
+  private val valueObj = new JSONTokener(new FileReader(dataFile)).nextValue().asInstanceOf[JSONObject]
 
-  def getBoolean(key: String): Boolean = config.getBoolean(key)
+  def getString(key: String): String = valueObj.getString(key)
+
+  def getBoolean(key: String): Boolean = valueObj.getBoolean(key)
 
   def putString(key: String, value: String): Unit = valueObj.put(key, value)
 
   def putBoolean(key: String, value: Boolean): Unit = valueObj.put(key, value)
 
-  override def save(): Unit = IOUtils.write(valueObj.toString, writer)
+  override def save(): Unit = {
+    writer.write(valueObj.toString())
+    writer.flush()
+  }
 
   override def close(): Unit = IOUtils.closeQuietly(writer)
 }

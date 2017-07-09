@@ -8,9 +8,9 @@ object LanguagePool {
   private val idToLanguage = new util.HashMap[String, Language]
 
   idToLanguage.put("cpp11",
-    new Language("cpp11", "c++11", "g++ -O2 -Wall -std=c++11 -o {file}.exe {file}.cc -lm", "./{file}.exe"))
-  idToLanguage.put("py",
-    new Language("py", "python3", "python -m py_compile {file}.py", "python {file}.py"))
+    new Language("cpp11", "c++11", "frolvlad/alpine-gcc", "g++ -O2 -Wall -std=c++11 -o {file}.exe {file}.cc -lm", "./{file}.exe"))
+  idToLanguage.put("py3",
+    new Language("py3", "python3", "python:alpine", "python3 -m py_compile {file}.py", "python3 {file}.py"))
 
   def getById(id: String): Language = idToLanguage.get(id)
 
