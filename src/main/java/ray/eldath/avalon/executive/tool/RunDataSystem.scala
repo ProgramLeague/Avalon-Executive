@@ -11,7 +11,7 @@ class RunDataSystem {
 }
 
 object RunDataSystem extends Preservable with Closeable {
-  private val dataFile = new File(ConstantPool.currentPath + "/data.json")
+  private val dataFile = new File(ConstantPool.CURRENT_PATH + "/data.json")
   private val writer = new FileWriter(dataFile, false)
 
   if (dataFile.length() == 0) {

@@ -1,21 +1,26 @@
 package ray.eldath.avalon.executive.tool;
 
+import com.google.common.io.Files;
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.DockerClient.ExecCreateParam;
 import com.spotify.docker.client.LogStream;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerState;
+import com.spotify.docker.client.messages.ExecState;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ray.eldath.avalon.executive.model.ExecState;
+import ray.eldath.avalon.executive.model.ExecInfoSimple;
+import ray.eldath.avalon.executive.model.ExecPair;
+import ray.eldath.avalon.executive.model.SafetyOutputStream;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
@@ -90,26 +95,64 @@ public class DockerOperator implements Closeable {
 
     public void copyFileOut(String containerId, File output, String pathInContainer)
             throws DockerException, InterruptedException, IOException {
-        IOUtils.copy(new TarArchiveInputStream(client.archiveContainer(containerId, pathInContainer)),
-                new FileOutputStream(output));
+        File temp = new File(output.getParent() + File.separator + "_temp.tar");
+        Files.createParentDirs(temp);
+        if (!temp.createNewFile())
+            throw new IOException("can not new temp file: " + temp.toString());
+        TarArchiveOutputStream aos = new TarArchiveOutputStream(new FileOutputStream(temp));
+        try (final TarArchiveInputStream tarStream = new TarArchiveInputStream(
+                client.archiveContainer(containerId, pathInContainer))) {
+            TarArchiveEntry entry;
+            while ((entry = tarStream.getNextTarEntry()) != null) {
+                aos.putArchiveEntry(entry);
+                IOUtils.copy(tarStream, aos);
+                aos.closeArchiveEntry();
+            }
+        }
+        aos.finish();
+        aos.close();
+        boolean unTarStatus = unTar(new TarArchiveInputStream(new FileInputStream(temp)), output.getParent());
         StringBuilder builder = new StringBuilder();
+        if (!unTarStatus)
+            throw new RuntimeException("un tar file error");
+        if (!temp.delete())
+            builder.append("temp file delete failed, but ");
         LOGGER.info(builder.append("copy files ").append(pathInContainer).append(" out of container ")
                 .append(containerId).append(" successful").toString());
     }
 
-    public ExecState exec(String containerId, String[] cmd) throws DockerException, InterruptedException {
-        final String execId = client.execCreate(containerId, cmd).id();
-        String log;
+    public ExecPair exec(String containerId, String cmd) throws DockerException, InterruptedException, IOException {
+        final String execId = client.execCreate(
+                containerId,
+                cmd.split(" "),
+                ExecCreateParam.attachStdout(),
+                ExecCreateParam.tty())
+                .id();
+        SafetyOutputStream outputStream = new SafetyOutputStream();
         try (final LogStream stream = client.execStart(execId)) {
-            log = stream.readFully();
+            stream.attach(outputStream, outputStream);
         }
-        LOGGER.info("execute cmd to container successful: " + execId);
-        Integer integer = client.execInspect(execId).exitCode();
-        return new ExecState(integer == null ? -1 : integer, log);
+        LOGGER.info("execute cmd to container successful - execId: " + execId);
+        String r = outputStream.get();
+        return new ExecPair(execId, r
+                .replace("\r", "")
+                .replace("\n", " ")
+        );
+    }
+
+    public ExecInfoSimple inspectExec(String execId) throws DockerException, InterruptedException {
+        ExecState state = client.execInspect(execId);
+        Integer integer = state.exitCode();
+        return new ExecInfoSimple(state.running(), integer == null ? 0 : integer, state);
     }
 
     public void closeContainer(String containerId) throws DockerException, InterruptedException {
-        client.stopContainer(containerId, 10);
+        client.stopContainer(containerId, 6);
+        client.removeContainer(containerId);
+    }
+
+    public void killContainer(String containerId) throws DockerException, InterruptedException {
+        client.killContainer(containerId);
         client.removeContainer(containerId);
     }
 
@@ -134,5 +177,22 @@ public class DockerOperator implements Closeable {
     @Override
     public void close() {
         client.close();
+    }
+
+    private boolean unTar(TarArchiveInputStream tarIn, String outputDir) throws IOException {
+        ArchiveEntry entry;
+        boolean newFile = false;
+        while ((entry = tarIn.getNextEntry()) != null) {
+            File tmpFile = new File(outputDir + "/" + entry.getName());
+            newFile = tmpFile.createNewFile();
+            OutputStream out = new FileOutputStream(tmpFile);
+            int length;
+            byte[] b = new byte[2048];
+            while ((length = tarIn.read(b)) != -1)
+                out.write(b, 0, length);
+            out.close();
+        }
+        tarIn.close();
+        return newFile;
     }
 }

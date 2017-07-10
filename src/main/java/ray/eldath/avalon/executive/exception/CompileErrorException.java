@@ -1,15 +1,22 @@
 package ray.eldath.avalon.executive.exception;
 
-import ray.eldath.avalon.executive.model.ExecState;
+import ray.eldath.avalon.executive.model.ExecPair;
 
 public class CompileErrorException extends Exception {
-    private ExecState state;
+    private ExecPair state;
 
-    public CompileErrorException(ExecState state) {
+    public CompileErrorException(ExecPair state) {
         this.state = state;
     }
 
-    public ExecState getState() {
+    public ExecPair getState() {
         return state;
+    }
+
+    @Override
+    public String toString() {
+        return "CompileErrorException{" +
+                "state=" + state.toString() +
+                '}';
     }
 }

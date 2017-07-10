@@ -33,6 +33,7 @@ public class PreProcessor {
         Language language = submission.getLanguage();
         String filePath = workDirectory + "/" + String.valueOf(submission.getSubmitTime());
         String codeFilePath = String.format("%s/_file.%s", filePath, getCodeFileSuffix(language.getCompileCmd()));
+
         String[] codeLinesArray = replaceClassName(language, submission.getDecodedCode())
                 .replace("\r", "")
                 .split("\n");
@@ -46,10 +47,13 @@ public class PreProcessor {
         }
         IOUtils.closeQuietly(writer);
 
+        String containerId = CompilerContainerPool.instance().getContainerId(language);
         DockerOperator.instance().copyFileIn(
-                CompilerContainerPool.instance().getContainerId(language),
+                containerId,
                 Paths.get(codeFilePath).getParent(),
                 "/sandbox");
+
+        Files.deleteIfExists(Paths.get(codeFilePath));
         return new File(codeFilePath);
     }
 

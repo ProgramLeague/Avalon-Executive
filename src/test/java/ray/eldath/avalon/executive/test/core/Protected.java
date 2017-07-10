@@ -15,5 +15,7 @@ class Protected {
     static final Submission py3 = new Submission(
             1,
             LanguagePool.getById("py3"),
-            "print(\"Hello World\")");
+            UrlEncoded.encodeString("print(\"Hello World\")"));
+
+    static final String workDir = "F:\\test";
 }
