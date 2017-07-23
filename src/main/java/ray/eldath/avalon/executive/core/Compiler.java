@@ -21,6 +21,10 @@ public class Compiler {
         String cmd = language.getCompileCmd();
         String executableSuffix = getCodeFileSuffix(cmd);
         File executableFile = new File(String.format("%s/%s/_file.%s", workDir, submission.getSubmitTime(), executableSuffix));
+
+        if (!language.isCompileNeeded())
+            return executableFile;
+
         String containerId = CompilerContainerPool.instance().getContainerId(language);
 
         ExecPair state = DockerOperator.instance().exec(containerId, cmd);

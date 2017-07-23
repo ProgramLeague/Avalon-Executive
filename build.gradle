@@ -1,5 +1,5 @@
 group 'tech.ray-eldath'
-version 'v0.0.1-alpha'
+version '0.0.1'
 
 apply plugin: 'java'
 apply plugin: 'scala'
@@ -12,6 +12,9 @@ targetCompatibility = 1.8
 repositories {
     jcenter()
     mavenCentral()
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
 dependencies {
@@ -34,6 +37,26 @@ dependencies {
     compile group: 'org.eclipse.jetty', name: 'jetty-util', version: '9.4.6.v20170531'
     // https://mvnrepository.com/artifact/com.spotify/docker-client
     compile group: 'com.spotify', name: 'docker-client', version: '8.8.0'
+}
+
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/main/java']
+        }
+        java {
+            srcDirs = []
+        }
+    }
+
+    test {
+        scala {
+            srcDirs = ['src/test/java']
+        }
+        java {
+            srcDirs = []
+        }
+    }
 }
 
 tasks.withType(ScalaCompile) {

@@ -37,7 +37,7 @@ for Avalon-Executive, API version `v0`
 
 ## 编译程序：Compile
 
-- **调用URL：`/avalon/executive/v0/get_all_lang`**
+- **调用URL：`/avalon/executive/v0/compile`**
 
 - **调用方法：POST**
 
@@ -60,7 +60,8 @@ for Avalon-Executive, API version `v0`
 - ```json
   {
     "id": 1000,
-    "error": false
+    "error": false,
+    "out": "URLEncoded后的编译错误信息，若无错误信息则为空"
   }
   ```
 
@@ -88,7 +89,6 @@ for Avalon-Executive, API version `v0`
   {
     "id": 1000,
     "error": false,
-    "return": "2", // URLEncoded后的错误信息（error为true）或程序返回（error为false）
-    "result": "Exited Normally\nWIFEXITED - WEXITSTATUS() = 0\n0\n6628"
+    "return": "2" // URLEncoded后的错误信息（error为true）或程序返回（error为false）
   }
   ```

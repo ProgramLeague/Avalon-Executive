@@ -1,4 +1,6 @@
 # Avalon-Executive [![GNU Affero General Public License, version 3](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/lgpl.html)
+[![Build Status](https://travis-ci.org/ProgramLeague/Avalon-Executive.svg?branch=master)](https://travis-ci.org/ProgramLeague/Avalon-Executive) [![CircleCI](https://circleci.com/gh/Ray-Eldath/Avalon/tree/master.svg?style=svg)](https://circleci.com/gh/Ray-Eldath/Avalon/tree/master) [![](https://jitpack.io/v/ProgramLeague/Avalon-Executive.svg)](https://jitpack.io/#ProgramLeague/Avalon-Executive)
+ 
 A safe program compiler & executor base on Docker.
 
 ## Deployment

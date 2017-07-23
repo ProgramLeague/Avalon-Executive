@@ -5,17 +5,10 @@ import ray.eldath.avalon.executive.model.Submission;
 import ray.eldath.avalon.executive.pool.LanguagePool;
 
 class Protected {
-    static final Submission cpp11 = new Submission(
-            0,
-            LanguagePool.getById("cpp11"),
-            UrlEncoded.encodeString("#include <cstdio>\n" +
-                    "int main {\n" +
-                    "   printf(\"Hello World\")\n" +
-                    "}"));
+    static final String workDir = "F:\\test";
+
     static final Submission py3 = new Submission(
             1,
             LanguagePool.getById("py3"),
             UrlEncoded.encodeString("print(\"Hello World\")"));
-
-    static final String workDir = "F:\\test";
 }

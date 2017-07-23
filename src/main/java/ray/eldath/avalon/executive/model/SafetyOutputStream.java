@@ -13,7 +13,7 @@ public class SafetyOutputStream extends OutputStream {
     public void write(int b) throws IOException {
         if (full)
             return;
-        if (builder.length() + 1 > ConstantPool.MAX_OUTPUT_STREAM_LENGTH()) {
+        if (builder.length() + 1 > ConstantPool._MAX_OUTPUT_STREAM_LENGTH()) {
             builder.append("...");
             full = true;
         }

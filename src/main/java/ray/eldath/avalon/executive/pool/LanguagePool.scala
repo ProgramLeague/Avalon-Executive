@@ -25,8 +25,18 @@ object LanguagePool {
       "python3",
       "python:alpine",
       "python:alpine",
-      "python3 -m py_compile _file.py",
-      "python3 _file.py")
+      "python3 _file.py",
+      "python3 _file.py").setDoNotNeedCompile()
+  )
+
+  idToLanguage.put("lice",
+    new Language(
+      "lice",
+      "lice-lang",
+      "ray-eldath/lice-alpine",
+      "ray-eldath/lice-alpine",
+      "java -jar lice.jar _file.lice",
+      "java -jar lice.jar _file.lice").setDoNotNeedCompile()
   )
 
   def getById(id: String): Language = idToLanguage.get(id)

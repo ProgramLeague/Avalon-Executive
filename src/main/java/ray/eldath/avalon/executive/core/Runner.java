@@ -12,13 +12,17 @@ import ray.eldath.avalon.executive.model.Language;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static ray.eldath.avalon.executive.tool.DockerOperator.instance;
 
 public class Runner {
-    private static final int TIME_LIMIT_MILLISECONDS = 5000;
+    private static final int _TIME_LIMIT_MILLISECONDS = 1500;
 
-    public static ExecPair run(Language language, File executableFile) throws DockerException, InterruptedException, RunErrorException, IOException {
+    public static ExecPair run(Language language, File executableFile)
+            throws DockerException, InterruptedException, RunErrorException, IOException {
         String image = language.getRunDockerImageName();
         ContainerConfig config = ContainerConfig.builder()
                 .networkDisabled(true)
@@ -32,7 +36,7 @@ public class Runner {
         instance().copyFileIn(containerId, executableFile.getParentFile().toPath(), "/sandbox");
         ExecPair state = instance().exec(containerId, language.getRunCmd());
 
-        Thread.sleep(TIME_LIMIT_MILLISECONDS);
+        Thread.sleep(_TIME_LIMIT_MILLISECONDS);
 
         ExecInfoSimple info = instance().inspectExec(state.getExecId());
 
@@ -48,7 +52,16 @@ public class Runner {
         if (!containerState.running())
             throw new RunErrorException("<unknown error>");
         instance().killContainer(containerId);
-        Files.deleteIfExists(executableFile.getParentFile().toPath());
+
+        delAll(executableFile.getParentFile().toPath());
+
         return state;
+    }
+
+    private static void delAll(Path path) throws IOException {
+        List<Path> paths = Files.list(path).collect(toList());
+        for (Path thisPath : paths)
+            Files.deleteIfExists(thisPath);
+        Files.deleteIfExists(path);
     }
 }
