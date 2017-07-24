@@ -5,13 +5,13 @@ import java.io.{Closeable, File, FileReader, FileWriter}
 import org.apache.commons.io.IOUtils
 import org.json.{JSONObject, JSONTokener}
 import ray.eldath.avalon.executive.model.Preservable
-import ray.eldath.avalon.executive.pool.ConstantPool
+import ray.eldath.avalon.executive.pool.Constants
 
 class RunDataSystem {
 }
 
 object RunDataSystem extends Preservable with Closeable {
-  private val dataFile = new File(ConstantPool._CURRENT_PATH + "/data.json")
+	private val dataFile = new File(Constants._CURRENT_PATH + "/data.json")
   private val writer = new FileWriter(dataFile, false)
 
   if (dataFile.length() == 0) {

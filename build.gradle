@@ -10,6 +10,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
+    maven {
+        url 'http://maven.aliyun.com/nexus/content/groups/public/'
+    }
     jcenter()
     mavenCentral()
     maven {
@@ -40,23 +43,11 @@ dependencies {
 }
 
 sourceSets {
-    main {
-        scala {
-            srcDirs = ['src/main/java']
-        }
-        java {
-            srcDirs = []
-        }
-    }
+    main.scala.srcDirs = ['src/main/java']
+    main.java.srcDirs = ['']
 
-    test {
-        scala {
-            srcDirs = ['src/test/java']
-        }
-        java {
-            srcDirs = []
-        }
-    }
+    test.scala.srcDirs = ['src/main/java']
+    test.java.srcDirs = ['']
 }
 
 tasks.withType(ScalaCompile) {

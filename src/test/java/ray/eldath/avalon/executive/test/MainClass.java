@@ -1,11 +1,12 @@
 package ray.eldath.avalon.executive.test;
 
-public class MainClass {
-    public static void main(String[] args) {
-        String test = "printf ()";
-        String[] tt = test.split("\n");
+import com.spotify.docker.client.exceptions.DockerException;
+import ray.eldath.avalon.executive.tool.DockerOperator;
 
-        for (String ttt : tt)
-            System.out.println(ttt);
-    }
+import java.nio.file.Paths;
+
+public class MainClass {
+	public static void main(String[] args) throws DockerException, InterruptedException {
+		System.out.println(DockerOperator.instance().createContainer("busybox", Paths.get("G:\\executive")));
+	}
 }

@@ -1,6 +1,6 @@
 package ray.eldath.avalon.executive.model;
 
-import ray.eldath.avalon.executive.pool.ConstantPool;
+import ray.eldath.avalon.executive.pool.Constants;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,8 +13,8 @@ public class SafetyOutputStream extends OutputStream {
     public void write(int b) throws IOException {
         if (full)
             return;
-        if (builder.length() + 1 > ConstantPool._MAX_OUTPUT_STREAM_LENGTH()) {
-            builder.append("...");
+	    if (builder.length() + 1 > Constants._MAX_OUTPUT_STREAM_LENGTH()) {
+		    builder.append("...");
             full = true;
         }
         builder.append((char) b);
