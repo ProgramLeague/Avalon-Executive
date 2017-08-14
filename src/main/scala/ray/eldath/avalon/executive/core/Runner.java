@@ -14,7 +14,7 @@ import java.io.IOException;
 import static ray.eldath.avalon.executive.tool.DockerOperator.instance;
 
 public class Runner {
-	private static final int _TIME_LIMIT_MILLISECONDS = 1500;
+	public static final int _TIME_LIMIT_MILLISECONDS = 1500;
 
 	public static ExecPair run(Language language, Submission submission)
 			throws DockerException, InterruptedException, RunErrorException, IOException {

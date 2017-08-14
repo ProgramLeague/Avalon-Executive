@@ -9,8 +9,8 @@ import java.util.List;
 import static ray.eldath.avalon.executive.tool.DockerOperator.instance;
 
 public class Initiator {
-    private static void init() throws DockerException, InterruptedException {
-        List<Language> all = LanguagePool.getAllLanguage();
+	public static void init() throws DockerException, InterruptedException {
+		List<Language> all = LanguagePool.getAllLanguage();
         for (Language thisLanguage : all) {
             String run = thisLanguage.getRunDockerImageName();
             String compile = thisLanguage.getCompileDockerImageName();

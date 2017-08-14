@@ -9,7 +9,6 @@ import ray.eldath.avalon.executive.core.PreProcessor;
 import ray.eldath.avalon.executive.exception.CompileErrorException;
 import ray.eldath.avalon.executive.model.Language;
 import ray.eldath.avalon.executive.model.Submission;
-import ray.eldath.avalon.executive.pool.Constants;
 import ray.eldath.avalon.executive.pool.ExecutableFilePool;
 import ray.eldath.avalon.executive.pool.LanguagePool;
 import ray.eldath.avalon.executive.pool.SubmissionPool;
@@ -47,11 +46,8 @@ public class Compile extends HttpServlet {
 		response.put("id", id);
 		File executableFile;
 		try {
-			executableFile = Compiler.compile(
-					PreProcessor.instance().createFile(Constants._WORK_DIR(), submission),
-					Constants._WORK_DIR(),
-					submission
-			);
+			PreProcessor.instance().createFile(submission);
+			executableFile = Compiler.compile(submission);
 		} catch (DockerException | InterruptedException e) {
 			ResponseRequestUtils.responseDockerException(resp, e);
 			return;
