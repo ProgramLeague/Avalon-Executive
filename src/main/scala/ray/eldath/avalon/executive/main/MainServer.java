@@ -31,6 +31,8 @@ public class MainServer {
 	}
 
 	public static void main(String[] args) throws Exception {
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+
 		Initiator.init();
 
 		Server server = new Server(PORT);
